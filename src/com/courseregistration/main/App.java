@@ -77,9 +77,26 @@ public class App {
 			} else if (ch == 7) {
 				// registration history retrieval logic
 			} else if (ch == 8) {
-				// student course registration logic
+				System.out.println("Enter the student's ID:");
+				int studentId = sc.nextInt();
+				
+				sc.nextLine();
+				System.out.println("Enter the course code: ");
+				String courseCode = sc.nextLine();
+				
+				Registration registration = new Registration(studentId, courseCode);
+				
+				RegistrationDAO.registerStudent(conn, registration);
 			} else if (ch == 9) {
-				// student course deregistration logic
+//				System.out.println("Enter the student's ID:");
+//				int studentId = sc.nextInt();
+//				
+//				System.out.println("Enter the course code: ");
+//				String courseCode = sc.nextLine();
+//				
+//				Registration registration = new Registration(studentId, courseCode);
+//				
+//				RegistrationDAO.deregisterStudent(conn, registration);
 			} else {
 				System.out.println("Invalid choice! Please try again.");
 			}

@@ -73,8 +73,4 @@ public class StudentDAO {
 			System.err.println("Error: " + e.getMessage());
 		}
 	}
-	
-	public static void registerStudent() {
-		String sql = "INSERT INTO registrations ()";
-	}
 }

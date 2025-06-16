@@ -10,7 +10,7 @@ import com.courseregistration.model.Course;
 
 public class CourseDAO {
 	public static void addCourse(Connection conn, Course course) {
-		String sql = "INSERT INTO course (course_code, name, seat_limit) "
+		String sql = "INSERT INTO course (course_code, name, seat_available) "
 				+ "VALUES (?, ?, ?)";
 		
 		try {
@@ -46,7 +46,7 @@ public class CourseDAO {
 				System.out.println(results.getString("id") + "\t" +
 					results.getString("course_code") + "\t" +
 					results.getString("name") + "\t" +
-					results.getInt("seat_limit") + "\t\t" + prerequisites);
+					results.getInt("seat_available") + "\t\t" + prerequisites);
 			}
 			System.out.println("\n");
 		} catch (SQLException e) {

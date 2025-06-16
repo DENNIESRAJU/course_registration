@@ -75,7 +75,10 @@ public class App {
 			} else if (ch == 6) {
 				PrerequisiteDAO.getAllPrerequisites(conn);
 			} else if (ch == 7) {
-				// registration history retrieval logic
+				System.out.println("Enter the student's ID:");
+				int studentId = sc.nextInt();
+				
+				RegistrationDAO.viewRegistrationHistory(conn, studentId);
 			} else if (ch == 8) {
 				System.out.println("Enter the student's ID:");
 				int studentId = sc.nextInt();
@@ -88,15 +91,15 @@ public class App {
 				
 				RegistrationDAO.registerStudent(conn, registration);
 			} else if (ch == 9) {
-//				System.out.println("Enter the student's ID:");
-//				int studentId = sc.nextInt();
-//				
-//				System.out.println("Enter the course code: ");
-//				String courseCode = sc.nextLine();
-//				
-//				Registration registration = new Registration(studentId, courseCode);
-//				
-//				RegistrationDAO.deregisterStudent(conn, registration);
+				System.out.println("Enter the student's ID:");
+				int studentId = sc.nextInt();
+				
+				System.out.println("Enter the course code: ");
+				String courseCode = sc.nextLine();
+				
+				Registration registration = new Registration(studentId, courseCode);
+				
+				RegistrationDAO.deregisterStudent(conn, registration);
 			} else {
 				System.out.println("Invalid choice! Please try again.");
 			}

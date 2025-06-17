@@ -5,6 +5,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashSet;
+
 import com.courseregistration.model.Registration;
 
 public class RegistrationDAO {
@@ -21,15 +23,14 @@ public class RegistrationDAO {
 			seatsAvailableStmt.setString(1, registration.getCourseCode());
 			ResultSet seats = seatsAvailableStmt.executeQuery();
 			
-			if (seats.getInt("seat_available") > 0) {
+			if (seats.next() && seats.getInt("seat_available") > 0) {
 				// check if student has prerequisites for the registering course
 				ArrayList<String> prerequisites = PrerequisiteDAO
 						.getCoursePrerequisites(conn, registration
 								.getCourseCode());
 				
 				if (prerequisites.size() > 0) {
-					ResultSet registrationHistory = 
-							getRegistrationHistory(conn, 
+					ResultSet registrationHistory = getRegistrationHistory(conn, 
 									registration.getStudentId());
 					
 					// number of rows in prerequisite ArrayList
@@ -39,9 +40,9 @@ public class RegistrationDAO {
 					while (registrationHistory.next()) {
 						// check if the course code in history matches
 						// the course codes in the prerequisites
-						for (int i = 0; i <= size; i++) {
+						for (int i = 0; i < size; i++) {
 							if (registrationHistory.getString("course_code")
-									== prerequisites.get(i)) {
+									.equals(prerequisites.get(i))) {
 								prerequisitesCompleted++;
 						}
 					}
@@ -49,22 +50,22 @@ public class RegistrationDAO {
 					
 				if (prerequisitesCompleted != size)
 					return;
-			}
+				}
 			
-			// if yes, then registering
-			PreparedStatement insert = conn.prepareStatement(sql);
-			insert.setInt(1, registration.getStudentId());
-			insert.setString(2, registration.getCourseCode());
+				// if yes, then registering
+				PreparedStatement insert = conn.prepareStatement(sql);
+				insert.setInt(1, registration.getStudentId());
+				insert.setString(2, registration.getCourseCode());
 		
-			PreparedStatement seatsChangeStmt = 
-				conn.prepareStatement(seatsChangeSql);
-			seatsChangeStmt.setString(1, registration.getCourseCode());
-		
-			int rowsInserted = insert.executeUpdate();
-			int seatsChanged = seatsChangeStmt.executeUpdate();
-			
-			if (rowsInserted > 0 && seatsChanged > 0)
-				System.out.println("Course registered successfully!\n");
+				PreparedStatement seatsChangeStmt = 
+						conn.prepareStatement(seatsChangeSql);
+				seatsChangeStmt.setString(1, registration.getCourseCode());
+				
+				int rowsInserted = insert.executeUpdate();
+				int seatsChanged = seatsChangeStmt.executeUpdate();
+				
+				if (rowsInserted > 0 && seatsChanged > 0)
+					System.out.println("Course registered successfully!\n");
 			} else {
 				System.out.println("This course is currently fully registered!");
 			}
@@ -79,7 +80,7 @@ public class RegistrationDAO {
 		String deleteRegistrationSql = "DELETE FROM registration WHERE "
 				+ "student_id = ? AND course_code = ?";
 		String seatChangeSql = "UPDATE course SET seat_available = "
-				+ "seat_available + 1 WHERE student_id = ?";
+				+ "seat_available + 1 WHERE course_code = ?";
 		String deregistrationSql = "INSERT INTO deregistration (student_id, "
 				+ "course_code) VALUES (?, ?)";
 		
@@ -90,7 +91,7 @@ public class RegistrationDAO {
 			deleteRegistration.setString(2, registration.getCourseCode());
 			
 			PreparedStatement seatChange = conn.prepareStatement(seatChangeSql);
-			seatChange.setInt(1, registration.getStudentId());
+			seatChange.setString(1, registration.getCourseCode());
 			
 			PreparedStatement deregistration = conn.
 					prepareStatement(deregistrationSql);
@@ -158,5 +159,29 @@ public class RegistrationDAO {
 		} catch (Exception e) {
 			System.out.println("Error: " + e.getMessage());
 		}
+	}
+	
+	// return a Set preloaded with the existing registrations for all students
+	public static HashSet<String> getAllRegistrations(Connection conn) {
+		String registrationsSql = "SELECT student_id, course_code FROM registration";
+		HashSet<String> registrationHistory = new HashSet<>();
+		
+		try {
+			PreparedStatement registrations = conn.prepareStatement(registrationsSql);
+			ResultSet results = registrations.executeQuery();
+
+			while (results.next()) {
+				 int studentId = results.getInt("student_id");
+		            String courseCode = results.getString("course_code");
+		            String key = studentId + ":" + courseCode;
+		            registrationHistory.add(key);
+			}
+		} catch (SQLException e) {
+			System.out.println("Error retrieving registrations: " + e.getMessage());
+		} catch (Exception e) {
+			System.out.println("Error: " + e.getMessage());
+		}
+		
+		return registrationHistory;
 	}
 }

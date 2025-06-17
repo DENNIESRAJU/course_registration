@@ -1,6 +1,7 @@
 package com.courseregistration.main;
 
 import java.sql.Connection;
+import java.util.HashSet;
 import java.util.Scanner;
 import com.courseregistration.model.*;
 import com.courseregistration.dao.*;
@@ -15,13 +16,16 @@ public class App {
 		System.out.println("--- COURSE REGISTRATION SYSTEM ---\n");
 		
 		while (true) {
-			System.out.println("1. Add Student");
-			System.out.println("2. Add Course");
-			System.out.println("3. Add Prerequisite");
-			System.out.println("4. View Students");
-			System.out.println("5. View Courses");
-			System.out.println("6. View Prerequisites");
-			System.out.println("7. View Registration History");
+			// pre-load student registrations history
+			HashSet<String> registrationHistory = RegistrationDAO.getAllRegistrations(conn);
+			
+			System.out.println("1. Add a Student");
+			System.out.println("2. Add a Course");
+			System.out.println("3. Add a Prerequisite");
+			System.out.println("4. View All Students");
+			System.out.println("5. View All Courses");
+			System.out.println("6. View All Prerequisites");
+			System.out.println("7. View Registrations of a Student");
 			System.out.println("8. Register Student in Course");
 			System.out.println("9. Deregister Student from Course");
 			System.out.println("10. Exit");
@@ -87,13 +91,19 @@ public class App {
 				System.out.println("Enter the course code: ");
 				String courseCode = sc.nextLine();
 				
-				Registration registration = new Registration(studentId, courseCode);
+				String key = studentId + ":" + courseCode;
 				
-				RegistrationDAO.registerStudent(conn, registration);
+				if (!registrationHistory.contains(key)) {
+					Registration registration = new Registration(studentId, courseCode);
+					RegistrationDAO.registerStudent(conn, registration);
+				} else {
+					System.out.println("Student is already registered for the course!");
+				}
 			} else if (ch == 9) {
 				System.out.println("Enter the student's ID:");
 				int studentId = sc.nextInt();
 				
+				sc.nextLine();
 				System.out.println("Enter the course code: ");
 				String courseCode = sc.nextLine();
 				
